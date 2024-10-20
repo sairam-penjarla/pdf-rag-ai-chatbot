@@ -1,0 +1,8 @@
+flask
+openai
+pandasql
+langchain
+python-dotenv
+langchain-community
+markdown
+PyPDF2

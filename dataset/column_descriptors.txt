@@ -1,0 +1,23 @@
+Column Descriptors:
+asin: Amazon Standard Identification Number (unique product ID).
+product_title: Title or name of the product.
+product_price: Current price of the product.
+product_original_price: Original price of the product (before any discounts).
+currency: Currency in which the price is listed (e.g., USD).
+product_star_rating: Star rating given to the product based on customer reviews.
+product_num_ratings: Number of customer ratings for the product.
+product_url: URL of the product page on Amazon.
+product_photo: Link to the product's image.
+product_num_offers: Number of offers available for the product.
+product_minimum_offer_price: Minimum price for all offers available.
+is_best_seller: Boolean flag indicating if the product is a best seller.
+is_amazon_choice: Boolean flag indicating if the product is Amazon’s Choice.
+is_prime: Boolean flag indicating Prime eligibility.
+product_availability: Availability status of the product.
+climate_pledge_friendly: Indicates if the product is marked as Climate Pledge Friendly.
+sales_volume: Estimated sales volume for the product.
+delivery: Information on delivery options and times.
+has_variations: Boolean flag indicating if the product has variations (e.g., size, color).
+unit_price: Price per unit for products sold in bulk or by volume.
+unit_count: Number of units in the product listing.
+coupon_text: Information on available coupons or discounts.
