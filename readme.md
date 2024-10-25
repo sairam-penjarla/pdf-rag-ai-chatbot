@@ -55,7 +55,7 @@ pip install -r requirements.txt
 Once the dependencies are installed, you can start the project by running:
 
 ```bash
-python app.py
+python run.py
 ```
 
 ## Project Details
