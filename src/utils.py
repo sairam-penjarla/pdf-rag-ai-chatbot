@@ -1,5 +1,6 @@
 import uuid
 import PyPDF2
+import sqlite3
 import markdown
 import chromadb
 import pandas as pd
@@ -15,7 +16,6 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 
 
 load_dotenv()
-df = pd.read_csv("dataset/cleaned_phone_search_data.csv")
 
 class CustomEmbeddings(Embeddings):
     def __init__(self, model_name: str):
@@ -26,7 +26,51 @@ class CustomEmbeddings(Embeddings):
 
     def embed_query(self, query: str):
         return self.model.encode([query])[0].tolist()
-    
+
+
+class ConversationDB:
+    def __init__(self, db_name="conversations.db"):
+        self.db_name = db_name
+        self.connection = sqlite3.connect(self.db_name, check_same_thread=False)
+        self.cursor = self.connection.cursor()
+        self._create_table()
+
+    def _create_table(self):
+        """Create the table for storing conversations if it doesn't exist."""
+        self.cursor.execute("""
+        CREATE TABLE IF NOT EXISTS conversations (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            question TEXT NOT NULL,
+            answer TEXT NOT NULL,
+            flow_index INTEGER DEFAULT 0,
+            conversation_index INTEGER DEFAULT 0
+        )
+        """)
+        self.connection.commit()
+
+    def store_conversation(self, question: str, answer: str, flow_index: int = 0, conversation_index: int = 0):
+        """Store a question, answer, and flow index into the database."""
+        self.cursor.execute("""
+        INSERT INTO conversations (question, answer, flow_index, conversation_index)
+        VALUES (?, ?, ?, ?)
+        """, (question, answer, flow_index, conversation_index))
+        self.connection.commit()
+
+    def retrieve_conversations(self):
+        """Retrieve all conversations from the database along with the flow index."""
+        self.cursor.execute("SELECT question, answer, flow_index, conversation_index FROM conversations")
+        rows = self.cursor.fetchall()
+        conversations = [{"question": row[0], "answer": row[1], "flow_index": row[2], "conversation_index": row[2]} for row in rows]
+        return conversations
+
+    def delete_all_conversations(self):
+        """Delete all conversations from the database."""
+        self.cursor.execute("DELETE FROM conversations")
+        self.connection.commit()
+
+    def close(self):
+        """Close the database connection."""
+        self.connection.close()
 
 
 class Utilities:
@@ -73,19 +117,17 @@ class Utilities:
         llm_params['messages'] = conversations
         llm_params['stream'] = True
 
+        # for i in conversations:
+        #     print(i)
+
         chat_completion = self.client.chat.completions.create(
             **llm_params
         )
 
-        self.llm_output = ""
         for chunk in chat_completion:
             content = chunk.choices[0].delta.content
             if content:
-                self.llm_output+=content
-                yield f"data: {content}\n\n"
-        
-        self.markdown_to_html(self.llm_output)
-        yield "data: [DONE]\n\n"
+                yield content
 
     def embed_document(self, text):
         return self.embedding_model.embed_query(text)  
@@ -100,13 +142,15 @@ class Utilities:
             )
 
     def query_chromadb(self, query, top_n=3):
+        print(query)
         query_embedding = self.embed_document(query)
         results = self.collection.query(query_embeddings=[query_embedding], n_results=top_n)
+        print(results)
         return "\n\n".join(results["documents"][0])
     
 
     def read_documents(self, content):
-        self.collection = self.vector_db_client.get_or_create_collection(str(uuid.uuid4()))
+        self.collection = self.vector_db_client.get_or_create_collection("kaggle_old")
         
         pdf_reader = PyPDF2.PdfReader(BytesIO(content))
         text = ''.join(page.extract_text() or '' for page in pdf_reader.pages)

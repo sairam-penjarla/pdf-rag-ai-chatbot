@@ -1,34 +1,90 @@
-# Ignore environment files
-*.env
-
-# Ignore log files and databases
-*.log
-*.sqlite3
-
-# Ignore Python specific files
+# Byte-compiled / optimized / DLL files
 __pycache__/
-*.pyc
-*.pyo
+*.py[cod]
+*$py.class
 
-# Ignore virtual environments
+# C extensions
+*.so
+
+# Virtual environment
 env/
 venv/
+ENV/
+.venv/
+.ENV/
 
-# Ignore Django migrations
-**/migrations/*.py
-!**/migrations/__init__.py
+# Django specific
+*.log
+*.pot
+*.pyc
+*.pyo
+*.pyd
+db.sqlite3
+instance/
+.media/
+.static/
 
-# Ignore IDE specific files
-.vscode/
-.idea/
+# Flask specific
+*.env
+instance/
+.webassets-cache
 
-# Ignore compiled libraries
-*.so
-*.dylib
-*.dll
+# Jupyter Notebook
+.ipynb_checkpoints
 
-# Ignore MacOS system files
+# macOS
 .DS_Store
 
-# Ignore node_modules if using Node.js
-node_modules/
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Visual Studio Code
+.vscode/
+*.code-workspace
+
+# Python-specific package files
+*.egg
+*.egg-info/
+dist/
+build/
+*.wheel
+
+# pipenv
+Pipfile.lock
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre
+.pyre/
+
+# Pytest
+.cache/
+*.cover
+.tox/
+*.pytest_cache/
+
+# Logs and debugging
+*.log
+*.out
+*.err
+
+# Coverage reports
+.coverage
+coverage.xml
+htmlcov/
+.coverage.*
+
+# Temporary files
+*.bak
+*.swp
+*.swo
+*.tmp
+
+# Local environment
+.idea/
+*.iml

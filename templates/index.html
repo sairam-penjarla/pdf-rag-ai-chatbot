@@ -1,43 +1,81 @@
 <!DOCTYPE html>
 <html lang="en">
-      <head>
-            <meta charset="UTF-8" />
-            <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-            <title>AI NLP to SQL Agent</title>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Knowledge base AI chatbot</title>
 
-            <!-- Link to CSS file -->
-            <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-      </head>
-      <body>
+        <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+        <!-- Link to CSS file -->
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/markdown_styles.css') }}" />
+    </head>
+    <body>
+        {% if pdf_files %}
+        <div class="pdf-file-container" id="fileContainer">
+            <div class="pdf-thumbnail-wrapper" id="pdf-thumbnail-container">
+                {% for pdf_file in pdf_files %}
+                <img src="{{ url_for('static', filename='images/icons8-pdf-100.png') }}" alt="PDF File {{ loop.index }}" class="pdf-thumbnail-icon" style="cursor: pointer" onclick="displayPDFInIframe('{{ pdf_file }}')" />
+                {% endfor %}
+            </div>
+
+            <div class="pdf-display-wrapper" id="displayContainer"></div>
+
             <!-- Collapse/Expand Icon (Initially hidden) -->
-            <button id="collapseExpandIcon" class="collapse-expand-icon" style="display: none;" onclick="togglePdfContainer()">
-                  <img src="{{ url_for('static', filename='images/icons8-collapse-100.png') }}" id="iconImage" />
+            <button id="pdf-collapse-expand-btn" class="collapse-expand-icon" onclick="togglePdfContainer()">
+                <img src="{{ url_for('static', filename='images/icons8-collapse-100.png') }}" id="pdf-collapse-expand-icon" />
             </button>
-            <div class="file-container" id="fileContainer">
+        </div>
+        {% endif %}
+        <div class="chat-main-container">
+            <div class="chat-message-wrapper hide-scrollbar" id="chat-message-wrapper">
+                <!-- Messages will be dynamically inserted here -->
             </div>
-
-
-            <div class="container">
-                  <div class="chat-container hide-scrollbar" id="chat-container">
-                        <!-- Messages will be dynamically inserted here -->
-                  </div>
-                  <div class="input-container">
-                        <div class="input-bar">
-                              <button id="attachButton" class="attach-button">
-                                    <img class="input-icon" id="attachIcon" src="{{ url_for('static', filename='images/icons8-attach-60.png') }}" />
-                              </button>
-                              <div id="userInput" class="input-box" contenteditable="true" placeholder="Type your message..." onkeypress="handleKeyPress(event)" oninput="checkInput()" onpaste="handlePaste(event)"></div>
-                              <button id="sendButton" class="send-button" onclick="sendMessage()">
-                                    <img class="input-icon" id="sendIcon" src="{{ url_for('static', filename='images/icons8-arrow-100.png') }}" />
-                              </button>
-                        </div>
-                  </div>
+            <div class="chat-input-wrapper">
+                <div class="chat-input-bar">
+                    <div id="chat-clear-btn" class="send-button">
+                        <img class="input-icon" id="chat-clear-icon" src="{{ url_for('static', filename='images/icons8-broom-100.png') }}" />
+                    </div>
+                    <div id="chat-attach-btn" class="send-button">
+                        <img class="input-icon" id="chat-attach-icon" src="{{ url_for('static', filename='images/icons8-attach-60.png') }}" />
+                    </div>
+                    <div id="chat-input-box" class="input-box" contenteditable="true" placeholder="Type your message..." onkeypress="handleKeyPress(event)" oninput="checkInput()" onpaste="handlePaste(event)"></div>
+                    <div id="chat-send-btn" class="send-button" onclick="sendMessage()">
+                        <img class="input-icon" id="chat-send-icon" src="{{ url_for('static', filename='images/icons8-arrow-100.png') }}" />
+                    </div>
+                </div>
             </div>
+        </div>
 
-            <!-- Link to JavaScript file -->
-            <script src="{{ url_for('static', filename='js/script.js') }}"></script>
-            <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-      </body>
+        <!-- Link to JavaScript file -->
+        <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+        <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const displayContainer = document.getElementById('displayContainer');
+
+                // Get the list of PDF files from the backend
+                const pdfFiles = {{ pdf_files | tojson }};
+
+                if (pdfFiles.length > 0) {
+                    // Display only the first PDF file initially
+                    const firstPdfFile = pdfFiles[0];
+                    const iframe = document.createElement('iframe');
+                    iframe.src = firstPdfFile;
+                    iframe.width = '100%';  // Set to full width
+                    iframe.height = '500px';  // Adjust the height as needed
+                    iframe.style.border = 'none';  // Remove border for clean look
+                    displayContainer.appendChild(iframe);
+                } else {
+                    // Fallback message if no PDFs are available
+                    displayContainer.innerHTML = '<p>No PDF files available.</p>';
+                }
+            });
+
+            // Pass conversations from Flask to JavaScript
+            const conversations = {{ conversations | tojson }};
+            renderConversations(conversations);
+        </script>
+    </body>
 </html>
-
-
