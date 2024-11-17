@@ -50,7 +50,7 @@ pip install -r requirements.txt
 To start the Flask server and run the project locally, use the following command:
 
 ```bash
-python app.py
+python run.py
 ```
 
 The application will be accessible at `http://127.0.0.1:5000/`.
