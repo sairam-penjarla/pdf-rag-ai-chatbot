@@ -2,115 +2,17 @@
 // GLOBAL VARIABLES & INITIAL SETUP
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-let shouldStopStream = false;
 let uploadedFile = null;
 let isPdfContainerExpanded = true;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // UTILITY FUNCTIONS
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-function cleanInput() {
-    const chatAttachIcon = document.getElementById("chat-input-box");
-    chatAttachIcon.innerHTML = chatAttachIcon.innerHTML.replace(/<span[^>]*>(.*?)<\/span>/g, "$1");
-}
 
-function copyToClipboard(text) {
-    navigator.clipboard
-        .writeText(text)
-        .then(() => {})
-        .catch((err) => {
-            console.error("Failed to copy: ", err);
-        });
-}
-
-function createCopyButton(messageElement) {
-    const copyButton = document.createElement("button");
-    copyButton.classList.add("copy-button");
-
-    const copyIcon = document.createElement("img");
-    copyIcon.src = "static/images/copy.png";
-    copyIcon.classList.add("action-icon");
-    copyButton.appendChild(copyIcon);
-    copyButton.onclick = () => {
-        copyToClipboard(messageElement.textContent);
-        changeIconTemporary(copyIcon, "static/images/copy-checked.png", 3000);
-    };
-
-    return copyButton;
-}
-
-function handleKeyPress(event) {
-    const chatSendBtn = document.getElementById("chat-send-btn");
-
-    if (event.key === "Enter" && !chatSendBtn.disabled) {
+async function invokeLLM(event) {
+    if (event.key === "Enter") {
         event.preventDefault();
-        sendMessage();
-    }
-}
-
-function checkInput() {
-    const chatAttachIcon = document.getElementById("chat-input-box").textContent.trim();
-    const chatSendBtn = document.getElementById("chat-send-btn");
-
-    if (chatAttachIcon.length > 0) {
-        chatSendBtn.style.backgroundImage = "linear-gradient(45deg, rgb(91 153 207), rgb(0 74 105))";
-    } else {
-        chatSendBtn.style.backgroundImage = "linear-gradient(45deg, rgb(0 0 0), rgb(151 151 151))";
-    }
-}
-
-function handlePaste(event) {
-    event.preventDefault();
-
-    const text = event.clipboardData.getData("text/plain");
-
-    document.execCommand("insertText", false, text);
-}
-
-function appendMessage(content, className) {
-    const chatContainer = document.getElementById("chat-message-wrapper");
-
-    const messageContainer = document.createElement("div");
-    messageContainer.classList.add(`${className}-container`);
-
-    const messageElement = document.createElement("div");
-    messageElement.classList.add("message", className);
-    messageElement.textContent = content;
-
-    messageContainer.appendChild(messageElement);
-
-    chatContainer.appendChild(messageContainer);
-
-    chatContainer.scrollTop = chatContainer.scrollHeight;
-}
-
-function renderConversations(conversations) {
-    conversations.forEach((convo) => {
-        // Display user message
-        appendMessage(convo.question, "user-message");
-
-        // Simulate bot response after displaying user message
-        streamBotResponse(convo.answer);
-    });
-}
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-// LOADING ANIMATIONS
-////////////////////////////////////////////////////////////////////////////////////////////////////
-function loadingExtractRelevantSchema() {
-    const chatContainer = document.getElementById("chat-message-wrapper");
-    const loadingMessageContainer = document.createElement("div");
-    loadingMessageContainer.classList.add("bot-loading-message-container");
-    loadingMessageContainer.textContent = "Analysing data";
-    loadingMessageContainer.id = "loading-extract-relevant-schema";
-    chatContainer.appendChild(loadingMessageContainer);
-}
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-// CHATBOT FUNCTIONS
-////////////////////////////////////////////////////////////////////////////////////////////////////
-async function sendMessage() {
-    const chatAttachIcon = document.getElementById("chat-input-box");
+        const chatAttachIcon = document.getElementById("chat-input-box");
     const chatSendBtn = document.getElementById("chat-send-btn");
     const chatSendIcon = document.getElementById("chat-send-icon");
 
@@ -122,7 +24,7 @@ async function sendMessage() {
     chatSendBtn.disabled = true;
     chatSendIcon.src = "static/images/stop.png";
 
-    appendMessage(message, "user-message");
+    showQuestion(message, "user-message");
     chatAttachIcon.innerText = "";
 
     loadingExtractRelevantSchema(); // loading animation while extract_relavant_schema method returns the results
@@ -139,12 +41,12 @@ async function sendMessage() {
 
         if (!responseAgent.ok) {
             console.error("Error:", responseAgent.statusText);
-            streamBotResponse("Error: " + responseAgent.statusText);
+            showAnswer("Error: " + responseAgent.statusText);
             return;
         }
 
         // Stream the response
-        streamBotResponse("");
+        showAnswer("");
         const reader = responseAgent.body.getReader();
         const decoder = new TextDecoder("utf-8");
         const messageContainers = document.querySelectorAll(".bot-message-container");
@@ -154,7 +56,7 @@ async function sendMessage() {
         let done = false;
         let llm_output = "";
 
-        while (!done && !shouldStopStream) {
+        while (!done) {
             const { value, done: readerDone } = await reader.read();
             done = readerDone;
 
@@ -187,7 +89,7 @@ async function sendMessage() {
         });
     } catch (error) {
         console.error("Error during message sending:", error);
-        streamBotResponse("Error: Something went wrong.");
+        showAnswer("Error: Something went wrong.");
     } finally {
         chatAttachIcon.setAttribute("contenteditable", "true");
         chatSendBtn.disabled = false;
@@ -197,9 +99,49 @@ async function sendMessage() {
             loadingExtractRelevantSchemaConst.remove();
         }
     }
+    }
 }
 
-function streamBotResponse(chunk) {
+function clearFormatting(event) {
+    event.preventDefault();
+    const text = event.clipboardData.getData("text/plain");
+    document.execCommand("insertText", false, text);
+}
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+// LOADING ANIMATIONS
+////////////////////////////////////////////////////////////////////////////////////////////////////
+function loadingExtractRelevantSchema() {
+    const chatContainer = document.getElementById("chat-message-wrapper");
+    const loadingMessageContainer = document.createElement("div");
+    loadingMessageContainer.classList.add("bot-loading-message-container");
+    loadingMessageContainer.textContent = "Analysing data";
+    loadingMessageContainer.id = "loading-extract-relevant-schema";
+    chatContainer.appendChild(loadingMessageContainer);
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+// CHATBOT FUNCTIONS
+////////////////////////////////////////////////////////////////////////////////////////////////////
+function showQuestion(content) {
+    const chatContainer = document.getElementById("chat-message-wrapper");
+
+    const messageContainer = document.createElement("div");
+    messageContainer.classList.add(`user-message-container`);
+
+    const messageElement = document.createElement("div");
+    messageElement.classList.add("message", "user-message");
+    messageElement.textContent = content;
+
+    messageContainer.appendChild(messageElement);
+
+    chatContainer.appendChild(messageContainer);
+
+    chatContainer.scrollTop = chatContainer.scrollHeight;
+}
+
+function showAnswer(chunk) {
     const chatContainer = document.getElementById("chat-message-wrapper");
 
     let messageContainer = document.createElement("div");
@@ -212,23 +154,6 @@ function streamBotResponse(chunk) {
     messageElement.classList.add("message", "bot-message");
 
     messageContainer.appendChild(messageElement);
-
-    const actionButtonContainer = document.createElement("div");
-    actionButtonContainer.classList.add("action-button-container");
-    actionButtonContainer.style.opacity = "0";
-
-    const copyButton = createCopyButton(messageElement);
-
-    actionButtonContainer.appendChild(copyButton);
-
-    messageContainer.appendChild(actionButtonContainer);
-
-    messageContainer.onmouseover = () => {
-        actionButtonContainer.style.opacity = "1";
-    };
-    messageContainer.onmouseout = () => {
-        actionButtonContainer.style.opacity = "0";
-    };
 
     chatContainer.appendChild(messageContainer);
 

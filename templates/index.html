@@ -40,7 +40,7 @@
                     <div id="chat-attach-btn" class="send-button">
                         <img class="input-icon" id="chat-attach-icon" src="{{ url_for('static', filename='images/icons8-attach-60.png') }}" />
                     </div>
-                    <div id="chat-input-box" class="input-box" contenteditable="true" placeholder="Type your message..." onkeypress="handleKeyPress(event)" oninput="checkInput()" onpaste="handlePaste(event)"></div>
+                    <div id="chat-input-box" class="input-box" contenteditable="true" placeholder="Type your message..." onkeypress="invokeLLM(event)" onpaste="clearFormatting(event)"></div>
                     <div id="chat-send-btn" class="send-button" onclick="sendMessage()">
                         <img class="input-icon" id="chat-send-icon" src="{{ url_for('static', filename='images/icons8-arrow-100.png') }}" />
                     </div>
@@ -75,7 +75,13 @@
 
             // Pass conversations from Flask to JavaScript
             const conversations = {{ conversations | tojson }};
-            renderConversations(conversations);
+            conversations.forEach((convo) => {
+                // Display user message
+                showQuestion(convo.question, "user-message");
+
+                // Simulate bot response after displaying user message
+                showAnswer(convo.answer);
+            });
         </script>
     </body>
 </html>

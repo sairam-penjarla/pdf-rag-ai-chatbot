@@ -1,7 +1,7 @@
 import os
 import uuid
 from src.utils import Utilities, ConversationDB
-from src.prompt_templates import AGENT_RESPONSE_GUIDELINES
+from src.prompt_templates import BOT_RESPONSE_GUIDELINES
 from flask import (
     Flask, 
     Response, 
@@ -13,7 +13,7 @@ from flask import (
 app = Flask(__name__)
 conv_db = ConversationDB()
 utils = Utilities()
-agent_conversation = utils.get_default_conversation()
+bot_conversation = utils.get_default_conversation()
 
 # Ensure a folder exists to store the uploaded PDFs
 UPLOAD_FOLDER = "static/uploaded_pdfs"
@@ -70,8 +70,8 @@ def create_vector_index():
 
 
 
-@app.route('/invoke_agent', methods=['POST'])
-def invoke_agent():
+@app.route('/invoke_bot', methods=['POST'])
+def invoke_bot():
     data = request.get_json()
 
     user_input = data.get('user_input')
@@ -81,12 +81,12 @@ def invoke_agent():
 
     msg = utils.get_user_msg( 
                 content = CONTENT, 
-                conversations = agent_conversation, 
-                present_question = user_input + AGENT_RESPONSE_GUIDELINES, 
+                conversations = bot_conversation, 
+                present_question = user_input + BOT_RESPONSE_GUIDELINES, 
             )
-    agent_output = utils.invoke_llm_stream(conversations = agent_conversation + [msg])
+    bot_output = utils.invoke_llm_stream(conversations = bot_conversation + [msg])
 
-    return Response(agent_output, content_type='text/event-stream')
+    return Response(bot_output, content_type='text/event-stream')
 
 @app.route('/delete_conversations', methods=['DELETE'])
 def delete_conversations():
@@ -102,8 +102,8 @@ def update_conversation():
     flow_index = data.get('flow_index')
     conversation_index = data.get('conversation_index')
     
-    agent_conversation.append({"role" : "user", "content" : user_input})
-    agent_conversation.append({"role" : "assistant", "content" : llm_output})
+    bot_conversation.append({"role" : "user", "content" : user_input})
+    bot_conversation.append({"role" : "assistant", "content" : llm_output})
 
     conv_db.store_conversation(user_input, llm_output, flow_index, conversation_index)
 

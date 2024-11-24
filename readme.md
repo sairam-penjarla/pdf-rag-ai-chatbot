@@ -50,7 +50,7 @@ pip install -r requirements.txt
 To start the Flask server and run the project locally, use the following command:
 
 ```bash
-python run.py
+python app.py
 ```
 
 The application will be accessible at `http://127.0.0.1:5000/`.
@@ -68,7 +68,6 @@ The **AI Chatbot with a Knowledge Base** project is designed to create a chatbot
 7. **Clear Conversations**: Users can clear the conversation history directly from the UI.
 8. **Document Preview**: The UI includes a preview window displaying thumbnails of the PDF files used in the knowledge base. Clicking on a thumbnail shows the content of the respective file.
 9. **Main Components**: The core components of this project include **OpenAI** for the chatbot and **ChromaDB** for storing document embeddings.
-10. **Code Reuse**: The HTML, CSS, and JavaScript code for the UI has been borrowed from a previous project called “Gen AI Agent.”
 
 ## 📘 Learn More
 

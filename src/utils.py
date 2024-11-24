@@ -9,7 +9,7 @@ from logger import logger
 from openai import OpenAI
 from config import get_config
 from dotenv import load_dotenv
-from src.prompt_templates import AGENT_GUIDELINES
+from src.prompt_templates import BOT_GUIDELINES
 from sentence_transformers import SentenceTransformer
 from langchain.embeddings.base import Embeddings
 from langchain.text_splitter import RecursiveCharacterTextSplitter
@@ -86,7 +86,7 @@ class Utilities:
         return [
             {
             "role": "system",
-            "content": AGENT_GUIDELINES
+            "content": BOT_GUIDELINES
             },]
 
     
@@ -113,7 +113,7 @@ class Utilities:
     
     def invoke_llm_stream(self, conversations):
         logger.debug("invoking llm")
-        llm_params = self.config.LLM_PARAMS
+        llm_params = self.config['LLM_PARAMS']
         llm_params['messages'] = conversations
         llm_params['stream'] = True
 

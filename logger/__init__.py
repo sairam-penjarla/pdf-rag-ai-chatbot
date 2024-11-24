@@ -14,6 +14,6 @@ logging.basicConfig(
     ]
 )
 
-logger = logging.getLogger("SQL Agent")
+logger = logging.getLogger("Knowledge base RAG")
 
 logger.setLevel(logging.INFO)

@@ -6,3 +6,5 @@ python-dotenv
 langchain-community
 markdown
 PyPDF2
+chromadb
+sentence-transformers
