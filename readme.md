@@ -71,8 +71,8 @@ The **AI Chatbot with a Knowledge Base** project is designed to create a chatbot
 
 ## 📘 Learn More
 
-For a detailed explanation and walkthrough of how this project works, check out my [blog post on this project](https://psairam9301.wixsite.com/website/post/ai-chatbot-with-a-knowledge-base).
+For a detailed explanation and walkthrough of how this project works, check out my [blog post on this project](https://psairam9301.wixsite.com/website/post/building-a-rag-application-part-1).
 
 ## 🎥 Watch the Video
 
-For a step-by-step guide, you can also watch the video on my [YouTube Channel](https://www.youtube.com/@sairampenjarla).
+For a step-by-step guide, you can also watch the video [YouTube video link](https://youtu.be/lq8kC6pAfsQ).
