@@ -87,7 +87,8 @@ class Utilities:
             {
             "role": "system",
             "content": BOT_GUIDELINES
-            },]
+            }
+        ]
 
     
     def get_user_msg(self, 
@@ -142,10 +143,8 @@ class Utilities:
             )
 
     def query_chromadb(self, query, top_n=3):
-        print(query)
         query_embedding = self.embed_document(query)
         results = self.collection.query(query_embeddings=[query_embedding], n_results=top_n)
-        print(results)
         return "\n\n".join(results["documents"][0])
     
 

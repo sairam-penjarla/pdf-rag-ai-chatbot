@@ -30,8 +30,8 @@ async function invokeLLM(event) {
     loadingExtractRelevantSchema(); // loading animation while extract_relavant_schema method returns the results
 
     try {
-        // send request to /invoke_agent (streaming response) # change here
-        const responseAgent = await fetch("/invoke_agent", {
+        // send request to /invoke_bot (streaming response) # change here
+        const responsebot = await fetch("/invoke_bot", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -39,15 +39,15 @@ async function invokeLLM(event) {
             body: JSON.stringify({ user_input: message, file_is_attached: uploadedFile !== null }),
         });
 
-        if (!responseAgent.ok) {
-            console.error("Error:", responseAgent.statusText);
-            showAnswer("Error: " + responseAgent.statusText);
+        if (!responsebot.ok) {
+            console.error("Error:", responsebot.statusText);
+            showAnswer("Error: " + responsebot.statusText);
             return;
         }
 
         // Stream the response
         showAnswer("");
-        const reader = responseAgent.body.getReader();
+        const reader = responsebot.body.getReader();
         const decoder = new TextDecoder("utf-8");
         const messageContainers = document.querySelectorAll(".bot-message-container");
         const messageContainer = messageContainers[messageContainers.length - 1];
