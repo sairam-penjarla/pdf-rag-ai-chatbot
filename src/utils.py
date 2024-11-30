@@ -79,6 +79,7 @@ class Utilities:
         self.config = get_config()
         self.client = OpenAI()
         self.vector_db_client = chromadb.Client()
+        self.collection = self.vector_db_client.get_or_create_collection("PDF_RAG")
         self.embedding_model = CustomEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
     
     def get_default_conversation(self):
@@ -149,8 +150,6 @@ class Utilities:
     
 
     def read_documents(self, content):
-        self.collection = self.vector_db_client.get_or_create_collection("kaggle_old")
-        
         pdf_reader = PyPDF2.PdfReader(BytesIO(content))
         text = ''.join(page.extract_text() or '' for page in pdf_reader.pages)
         chunks = RecursiveCharacterTextSplitter(chunk_size=512, chunk_overlap=156).split_text(text)
