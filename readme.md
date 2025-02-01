@@ -1,126 +1,126 @@
-# [![Website](https://img.shields.io/badge/Website-Visit-brightgreen)](https://psairam9301.wixsite.com/website) [![YouTube](https://img.shields.io/badge/YouTube-Subscribe-red)](https://www.youtube.com/@sairampenjarla) [![GitHub](https://img.shields.io/badge/GitHub-Explore-black)](https://github.com/sairam-penjarla) [![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-blue)](https://www.linkedin.com/in/sairam-penjarla-b5041b121/) [![Instagram](https://img.shields.io/badge/Instagram-Follow-ff69b4)](https://www.instagram.com/sairam.ipynb/)
+[![Website](https://img.shields.io/badge/Website-Visit-brightgreen)](https://psairam9301.wixsite.com/website) 
+[![YouTube](https://img.shields.io/badge/YouTube-Subscribe-red)](https://www.youtube.com/@sairampenjarla) 
+[![GitHub](https://img.shields.io/badge/GitHub-Explore-black)](https://github.com/sairam-penjarla) 
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-blue)](https://www.linkedin.com/in/sairam-penjarla-b5041b121/) 
+[![Instagram](https://img.shields.io/badge/Instagram-Follow-ff69b4)](https://www.instagram.com/sairam.ipynb/)
 
-# NLP to SQL AI Agent
+# 📌 PDF-RAG AI Chatbot
 
-## Project Overview
+An AI chatbot built using **Retrieval-Augmented Generation (RAG)**, OpenAI, Flask, Python, and ChromaDB. The chatbot is designed to answer questions based on a structured knowledge base created from publicly available PDFs and web pages related to **L&T Construction Company**.
 
-The **NLP to SQL AI Agent** is an advanced AI-powered chatbot that enables users to directly interact with a database by asking questions in natural language. It utilizes OpenAI's language model to convert questions into SQL queries, execute them, and return the answers to the users. The chatbot also offers a smooth user interface with features like session management, light/dark mode toggle, and interactive loading animations.
+---
 
-## Project Setup
+## 🚀 Getting Started
 
-### 1. Clone the repository
-Start by cloning the repository to your local machine:
-```bash
-git clone https://github.com/sairam-penjarla/nlp-to-sql-ai-agent.git
+### 1️⃣ Clone the Repository
+
+```sh
+git clone https://github.com/sairam-penjarla/pdf-rag-ai-chatbot.git
+cd pdf-rag-ai-chatbot
 ```
 
-### 2. Change directory
-Navigate to the cloned repository:
-```bash
-cd nlp-to-sql-ai-agent
-```
+### 2️⃣ Create a Virtual Environment
 
-### 3. Set up the environment
-Create a virtual environment or Anaconda environment. For guidance, refer to this [blog post](https://sairampenjarla.notion.site/Environment-171d56a2fc2780dd9efcd4cef331fa2c).
+Follow this blog post for setting up a **virtual environment** or **Anaconda environment**:  
+🔗 [Environment Setup Guide](https://sairampenjarla.notion.site/Environment-171d56a2fc2780dd9efcd4cef331fa2c)
 
-#### Virtual Environment
-```bash
+For a virtual environment:
+```sh
 python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+source venv/bin/activate  # On macOS/Linux
+venv\Scripts\activate      # On Windows
 ```
 
-#### Anaconda Environment
-```bash
-conda create --name nlp_sql_agent python=3.8
-conda activate nlp_sql_agent
+For an Anaconda environment:
+```sh
+conda create --name rag-chatbot python=3.9
+conda activate rag-chatbot
 ```
 
-### 4. Install dependencies
-Install the required dependencies using the `requirements.txt` file:
-```bash
+### 3️⃣ Install Dependencies
+
+```sh
 pip install -r requirements.txt
 ```
 
-### 5. Run the project
-Run the Flask app:
-```bash
+### 4️⃣ Set Up API Key
+
+Create a `.env` file in the project root and add your **OpenAI API Key**:
+
+```
+OPENAI_API_KEY=your_openai_api_key_here
+```
+
+### 5️⃣ Run the Project
+
+```sh
 python app.py
 ```
-Visit `http://127.0.0.1:5000` in your browser to interact with the AI agent.
 
-## Project Details
+The application will be available at `http://localhost:5000`.
 
-This project is an AI-powered chatbot built to help users interact with databases via natural language. Here are the key features of the project:
+---
 
-- **Natural Language Processing (NLP)**: The chatbot converts user questions into SQL queries.
-- **Interactive Sessions**: Users can have multiple sessions, and each session is stored for future reference.
-- **Light/Dark Mode**: Toggle between light and dark modes for a personalized experience.
-- **Loading Animations**: View a small loading animation as the chatbot formulates responses.
-- **Session Management**: View previous sessions in the sidebar, delete individual sessions, or clear all sessions.
-- **OpenAI Integration**: Uses OpenAI to process user input and generate SQL queries.
-- **Streamed Responses**: Responses are displayed word-by-word as the chatbot types, giving a real-time feel.
-- **Icons for Sessions**: Each session has a unique icon from [Lucide.dev](http://lucide.dev).
-- **Customizable**: Set up your OpenAI API key by creating a `.env` file and setting `OPENAI_API_KEY`.
+## 📌 Project Overview
 
-This project is useful for anyone looking to integrate NLP with databases for query generation, and it serves as a robust example of building AI agents with Flask and OpenAI.
+### 🔹 Features
+- Uses **RAG** to fetch relevant data from a **ChromaDB knowledge base**.
+- Chatbot is trained using publicly available **PDFs and web pages** about **L&T Construction**.
+- Users can ask questions, and the bot retrieves and generates accurate responses.
+- Provides **reference links** for every answer.
+- **Session management**: Previous chat sessions are stored and can be revisited via the sidebar.
+- **Smart Prompt Engineering**: Detects irrelevant or inappropriate queries and responds accordingly.
+- Built with **Flask, OpenAI API, SQLite, JavaScript, HTML, and CSS**.
+- Uses **streaming responses** for a natural typing effect.
+- Displays a **loading animation** while processing responses.
+- **Sidebar with session history** and delete options for individual sessions or all at once.
+- Uses **Lucide.dev icons** for an aesthetic UI.
 
-## Blog Post
+### 🔹 How It Works
+1. The user submits a question.
+2. The backend queries **ChromaDB** to retrieve relevant content.
+3. The retrieved content + question is sent to OpenAI’s API.
+4. The response is streamed back **word by word** for a natural effect.
+5. The session and responses are stored in an **SQLite database**.
+6. Users can click on previous sessions in the sidebar to revisit past chats.
 
-For a more detailed explanation of this project and its real-world applications, check out this [blog post](https://sairampenjarla.notion.site/NLP-to-SQL-AI-AGENT-187d56a2fc2781aab916fc63638a71ba).
+### 🔹 Architecture Diagram
+📌 **How the chatbot processes user requests**  
+![Architecture Diagram](media/architecture%20Diagram.png)  
 
-## Project Architecture
+**Description**:  
+- The user submits a request → `get_relevant_content` fetches data from the knowledge base.  
+- The retrieved content is sent to `invoke_agent`, which calls OpenAI’s API.  
+- The response is streamed back to the frontend.  
+- After completion, the session is updated in the database via `update_session`.  
 
-The architecture diagram and detailed flow of the application can be found in the `media` folder, along with the `screenshot` images illustrating the UI and interactions.
+---
 
-### Architecture Diagram
-![Architecture Diagram](media/architecture%20diagram.png)
+## 📌 Screenshots
 
-In this architecture, the process starts when the user asks a question. The chatbot first identifies relevant tables and columns from the database schema, then constructs an SQL query. The query results are used to generate the answer, which is streamed word-by-word to the user.
+| Screenshot | Description |
+|------------|------------|
+| ![Welcome Screen](media/screenshot_6.png) | **Welcome screen** |
+| ![Chatbot Response (Light Mode)](media/screenshot_2.png) | **How chatbot responses look in light mode** |
+| ![Previous Sessions](media/screenshot_5.png) | **Sidebar showing previous sessions** |
+| ![Loading Animation](media/screenshot_1.png) | **Loading animation while processing input** |
+| ![Dark Mode UI](media/screenshot_4.png) | **Chatbot UI in dark mode** |
+| ![References Expanded](media/screenshot_3.png) | **Expanded reference section** |
 
-## Screenshots
+---
 
-Here are some screenshots showcasing the user interface and chatbot functionality:
+## 📌 Blog Article
+For a detailed breakdown of the project, visit the blog post:  
+🔗 **[RAG AI Chatbot – Full Guide](https://sairampenjarla.notion.site/RAG-AI-Chatbot-18dd56a2fc27803e91c7d76dbcb8d2b9)**
 
+---
 
-![Loading Animation](media/screenshot_6.png)
-  
-  Showing the loading circle animation while the chatbot processes the question.
-  
+## 📌 Connect with Me
 
-![Dark Mode UI](media/screenshot_4.png)
-  
-  The UI in dark mode.
+[![Website](https://img.shields.io/badge/Website-Visit-brightgreen)](https://psairam9301.wixsite.com/website)  
+[![YouTube](https://img.shields.io/badge/YouTube-Subscribe-red)](https://www.youtube.com/@sairampenjarla)  
+[![GitHub](https://img.shields.io/badge/GitHub-Explore-black)](https://github.com/sairam-penjarla)  
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-blue)](https://www.linkedin.com/in/sairam-penjarla-b5041b121/)  
+[![Instagram](https://img.shields.io/badge/Instagram-Follow-ff69b4)](https://www.instagram.com/sairam.ipynb/)  
 
-
-![Light Mode UI](media/screenshot_1.png)
-  
-  The UI in light mode.
-
-
-![Chatbot Responses](media/screenshot_5.png)
-  
-  Chatbot responses, including tabular outputs.
-
-
-![Sidebar with Sessions](media/screenshot_3.png)
-  
-  Sidebar displaying previous sessions.
-
-
-![Chatbot in Light Mode](media/screenshot_2.png)
-  
-  Chatbot responses in light mode.
-
-
-![Chatbot in Dark Mode](media/screenshot_7.png)
-  
-  Chatbot responses in dark mode.
-
-
-![Chatbot in Dark Mode](media/screenshot_9.png)
-  
-  Another example of chatbot responses in dark mode.
-
-## License
-
-This project is licensed under the MIT License. See the LICENSE file for more details.
+🚀 **Star the repo if you found this useful!**  
