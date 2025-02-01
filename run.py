@@ -1,113 +1,178 @@
 import os
-import uuid
-from src.utils import Utilities, ConversationDB
-from src.prompt_templates import BOT_RESPONSE_GUIDELINES
-from flask import (
-    Flask, 
-    Response, 
-    jsonify, 
-    render_template, 
-    request
-)
+import json
+import traceback
+from flask import Flask, Response, jsonify, render_template, request
+from src.utils import Utilities
+from custom_logger import logger
 
+# Initialize Flask app
 app = Flask(__name__)
-conv_db = ConversationDB()
-utils = Utilities()
-bot_conversation = utils.get_default_conversation()
 
-# Ensure a folder exists to store the uploaded PDFs
-UPLOAD_FOLDER = "static/uploaded_pdfs"
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+# Initialize utilities
+utils = Utilities()
+
+# ---------------- Landing Page ----------------
 
 @app.route("/")
 def landing_page():
-    # Retrieve conversations
-    conversations = conv_db.retrieve_conversations()
-    
-    # List all PDF files in the UPLOAD_FOLDER
-    pdf_files = []
-    if os.path.exists(UPLOAD_FOLDER):
-        pdf_files = [
-            os.path.join(UPLOAD_FOLDER, f)
-            for f in os.listdir(UPLOAD_FOLDER)
-            if f.endswith('.pdf')
-        ]
+    """
+    Renders the main application interface.
+    Fetches previous session metadata and passes it to the frontend.
+    """
+    try:
+        previous_sessions = utils.session_utils.get_session_meta_data()
+        return render_template("index.html", previous_session_meta_data=previous_sessions)
+    except Exception as e:
+        logger.error(f"Error in landing_page: {str(e)}")
+        logger.error(traceback.format_exc())
+        return jsonify({"error": "An internal server error occurred"}), 500
 
-    return render_template("index.html", conversations=conversations, pdf_files=pdf_files)
+# ---------------- Session Management Routes ----------------
 
+@app.route('/get_random_session_icon', methods=['POST'])
+def get_random_session_icon():
+    """
+    Returns a random session icon for a given session ID.
+    """
+    try:
+        data = request.get_json()
+        session_id = data.get('session_id')
+        return jsonify({"session_icon": utils.get_session_icon(session_id)})
+    except Exception as e:
+        logger.error(f"Error in get_random_session_icon: {str(e)}")
+        logger.error(traceback.format_exc())
+        return jsonify({"error": "An internal server error occurred"}), 500
 
-@app.route('/create_vector_index', methods=['POST'])
-def create_vector_index():
-    if 'pdf' not in request.files:
-        return jsonify({'success': False, 'error': 'No file part'}), 400
+@app.route('/get_session_data', methods=['POST'])
+def get_session_data():
+    """
+    Retrieves session data for a given session ID.
+    """
+    try:
+        data = request.get_json()
+        session_id = data.get('sessionId')
+        session_data = utils.session_utils.get_session_data(session_id)
+        return jsonify({'session_data': session_data})
+    except Exception as e:
+        logger.error(f"Error in get_session_data: {str(e)}")
+        logger.error(traceback.format_exc())
+        return jsonify({"error": "An internal server error occurred"}), 500
 
-    file = request.files['pdf']
-    
-    if file.filename == '':
-        return jsonify({'success': False, 'error': 'No selected file'}), 400
+@app.route('/delete_session', methods=['POST'])
+def delete_session():
+    """
+    Deletes a specific session based on session ID.
+    """
+    try:
+        data = request.get_json()
+        session_id = data.get('session_id')
 
-    if file and file.filename.endswith('.pdf'):
-        try:
-            # Generate a unique filename to avoid collisions
-            unique_filename = f"{uuid.uuid4()}_{file.filename}"
-            file_path = os.path.join(UPLOAD_FOLDER, unique_filename)
+        if not session_id:
+            return jsonify({"error": "Session ID is required."}), 400
 
-            # Save the file to the local folder
-            file.save(file_path)
-            
-            # Read the content from the saved file for processing
-            with open(file_path, 'rb') as pdf_file:
-                pdf_bytes = pdf_file.read()
-                utils.read_documents(pdf_bytes)
+        response, status_code = utils.session_utils.delete_session(session_id)
+        return jsonify(response), status_code
+    except Exception as e:
+        logger.error(f"Error in delete_session: {str(e)}")
+        logger.error(traceback.format_exc())
+        return jsonify({"error": "An internal server error occurred"}), 500
 
-            # Return a success response
-            return jsonify({'success': True, 'file_path': file_path})
-        
-        except Exception as e:
-            return jsonify({'success': False, 'error': str(e)}), 500
-    
-    return jsonify({'success': False, 'error': 'Invalid file type'}), 400
+@app.route('/delete_all_sessions', methods=['POST'])
+def delete_all_sessions():
+    """
+    Deletes all stored sessions.
+    """
+    try:
+        response, status_code = utils.session_utils.delete_all_sessions()
+        return jsonify(response), status_code
+    except Exception as e:
+        logger.error(f"Error in delete_all_sessions: {str(e)}")
+        logger.error(traceback.format_exc())
+        return jsonify({"error": "An internal server error occurred"}), 500
 
+@app.route('/update_session', methods=['POST'])
+def update_session():
+    """
+    Updates a session with new data (prompt, SQL query, assistant responses, etc.).
+    """
+    try:
+        data = request.get_json()
 
+        session_id = data.get('session_id')
+        prompt = data.get('prompt')
+        session_icon = data.get('session_icon')
+        meta_data = data.get('meta_data')
+        llm_output = data.get('llm_output')
 
-@app.route('/invoke_bot', methods=['POST'])
-def invoke_bot():
-    data = request.get_json()
+        utils.session_utils.add_data(session_id, prompt, llm_output, meta_data, session_icon)
 
-    user_input = data.get('user_input')
-    file_is_attached = data.get('file_is_attached')
+        return jsonify({"success": True})
+    except Exception as e:
+        logger.error(f"Error in update_session: {str(e)}")
+        logger.error(traceback.format_exc())
+        return jsonify({"error": "An internal server error occurred"}), 500
 
-    CONTENT = utils.query_chromadb(user_input) if file_is_attached else ""
+# ---------------- Content Retrieval Routes ----------------
 
-    msg = utils.get_user_msg( 
-                content = CONTENT, 
-                conversations = bot_conversation, 
-                present_question = user_input + BOT_RESPONSE_GUIDELINES, 
-            )
-    bot_output = utils.invoke_llm_stream(conversations = bot_conversation + [msg])
+@app.route('/get_relevant_content', methods=['POST'])
+def get_relevant_content():
+    """
+    Retrieves the most relevant content from the knowledge base based on user input.
+    """
+    try:
+        data = request.get_json()
+        user_input = data.get('user_input')
+        relevant_content = utils.get_relevant_content(user_input)
+        # Convert the numpy float32 values to regular float
+        for result in relevant_content:
+            result['similarity_score'] = float(result['similarity_score'])
+            result['cross_encoder_score'] = float(result['cross_encoder_score'])
 
-    return Response(bot_output, content_type='text/event-stream')
+        # Now you can serialize it into JSON
+        json_output = json.dumps(relevant_content, indent=4)
 
-@app.route('/delete_conversations', methods=['DELETE'])
-def delete_conversations():
-    """Delete all conversations from the database."""
-    conv_db.delete_all_conversations()
-    return jsonify({"success": True, "message": "All conversations deleted."})
+        return jsonify({"relevant_content": json_output})
+    except Exception as e:
+        logger.error(f"Error in get_relevant_content: {str(e)}")
+        logger.error(traceback.format_exc())
+        return jsonify({"error": "An internal server error occurred"}), 500
 
-@app.route('/update_conversation', methods=['POST'])
-def update_conversation():
-    data = request.get_json()
-    user_input = data.get('user_input')
-    llm_output = data.get('llm_output')
-    flow_index = data.get('flow_index')
-    conversation_index = data.get('conversation_index')
-    
-    bot_conversation.append({"role" : "user", "content" : user_input})
-    bot_conversation.append({"role" : "assistant", "content" : llm_output})
+# ---------------- AI Agent Invocation ----------------
 
-    conv_db.store_conversation(user_input, llm_output, flow_index, conversation_index)
+@app.route('/invoke_agent', methods=['POST'])
+def invoke_agent():
+    """
+    Processes a user query and streams an AI-generated response.
+    Utilizes session history and relevant content for context.
+    """
+    try:
+        data = request.get_json()
 
-    return jsonify({"success" : True})
+        user_input = data.get('user_input')
+        session_id = data.get('session_id')
+        relevant_content = data.get('relevant_content')
+        relevant_content = " ".join([x['document'] for x in relevant_content])
+
+        # Retrieve conversation history
+        previous_messages = utils.get_previous_messages(session_id)
+
+        # Format the user message
+        user_message = utils.get_user_msg(relevant_content, user_input)
+
+        # Stream AI-generated response
+        agent_output = utils.invoke_llm_stream(messages=previous_messages + [user_message])
+        return Response(agent_output, content_type='text/event-stream')
+
+    except Exception as e:
+        logger.error(f"Error in invoke_agent: {str(e)}")
+        logger.error(traceback.format_exc())
+        return jsonify({"error": "An internal server error occurred"}), 500
+
+# ---------------- Application Entry Point ----------------
 
 if __name__ == "__main__":
+    """
+    Starts the Flask application.
+    Accessible at http://0.0.0.0:8000
+    """
     app.run(host="0.0.0.0", port=8000)

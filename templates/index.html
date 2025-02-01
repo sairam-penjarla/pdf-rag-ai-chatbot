@@ -1,87 +1,68 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Knowledge base AI chatbot</title>
+      <head>
+            <meta charset="UTF-8" />
+            <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+            <title>NLP to SQL AI Agent</title>
 
-        <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-
-        <!-- Link to CSS file -->
-        <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
-        <link rel="stylesheet" href="{{ url_for('static', filename='css/markdown_styles.css') }}" />
-    </head>
-    <body>
-        {% if pdf_files %}
-        <div class="pdf-file-container" id="fileContainer">
-            <div class="pdf-thumbnail-wrapper" id="pdf-thumbnail-container">
-                {% for pdf_file in pdf_files %}
-                <img src="{{ url_for('static', filename='images/icons8-pdf-100.png') }}" alt="PDF File {{ loop.index }}" class="pdf-thumbnail-icon" style="cursor: pointer" onclick="displayPDFInIframe('{{ pdf_file }}')" />
-                {% endfor %}
+            <!-- Link to CSS file -->
+            <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+            <link rel="stylesheet" href="{{ url_for('static', filename='css/markdown_styles.css') }}" />
+      </head>
+      <body>
+            <div class="color-mode-toggle-container">
+                  <label class="theme-switch">
+                        <input type="checkbox" id="theme-toggle">
+                        <span class="slider"></span>
+                  </label>
+            </div>
+            <div class="sidebar">
+                  <div class="project-name">
+                        <div class="project-title">NLP to SQL AI Agent</div>
+                        <button class="new-session-button">
+                              <img src="/static/images/session-icons/plus.svg" class="new-session-icon">
+                        </button>
+                  </div>
+                  <div class="recent-chats">
+                        <p>Recent Chat</p>
+                        <a href="#" class="clear-all" onclick="clearAllChats()">Clear All</a>
+                  </div>
+                  <ul class="session-list" id="session-list">
+                        {% for session_id, meta_data in previous_session_meta_data.items() %}
+                        <li class="chat-item" session_id="{{ session_id }}" onclick="loadSessionData('{{ session_id }}')">
+                            <div class="chat-item-emoji">
+                                <img src="/static/images/session-icons/{{ meta_data.session_icon }}" class="emoji-button">
+                            </div>
+                            <div class="chat-item-question">{{ meta_data.prompt }}</div>
+                            <div class="chat-item-delete-container">
+                                <img src="/static/images/delete_black.svg" class="delete-button" onclick="event.stopPropagation(); deleteSession('{{ session_id }}')">
+                            </div>
+                            <div class="chat-item-indicator"></div>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    
+                    
+            </div>
+            <div class="container">
+                  <div class="chat-container hide-scrollbar" id="chat-container"></div>
+                  <div class="input-container">
+                        <div class="input-bar">
+                              <div id="userInput" class="input-box" contenteditable="true" placeholder="Type your message..." onkeypress="handleKeyPress(event)" onpaste="handlePaste(event)"></div>
+                        </div>
+                        <div class="input-options">
+                              <button class="mic-button">
+                                    <img class="mic-icon"src="{{ url_for('static', filename='images/mic.svg') }}" />
+                              </button>
+                              <button id="sendButton" class="send-button" onclick="sendMessageFromInputBar()">
+                                    <img class="send-icon" id="sendIcon" src="{{ url_for('static', filename='images/arrow-left.svg') }}" />
+                              </button>
+                        </div>
+                  </div>
             </div>
 
-            <div class="pdf-display-wrapper" id="displayContainer"></div>
-
-            <!-- Collapse/Expand Icon (Initially hidden) -->
-            <button id="pdf-collapse-expand-btn" class="collapse-expand-icon" onclick="togglePdfContainer()">
-                <img src="{{ url_for('static', filename='images/icons8-collapse-100.png') }}" id="pdf-collapse-expand-icon" />
-            </button>
-        </div>
-        {% endif %}
-        <div class="chat-main-container">
-            <div class="chat-message-wrapper hide-scrollbar" id="chat-message-wrapper">
-                <!-- Messages will be dynamically inserted here -->
-            </div>
-            <div class="chat-input-wrapper">
-                <div class="chat-input-bar">
-                    <div id="chat-clear-btn" class="send-button">
-                        <img class="input-icon" id="chat-clear-icon" src="{{ url_for('static', filename='images/icons8-broom-100.png') }}" />
-                    </div>
-                    <div id="chat-attach-btn" class="send-button">
-                        <img class="input-icon" id="chat-attach-icon" src="{{ url_for('static', filename='images/icons8-attach-60.png') }}" />
-                    </div>
-                    <div id="chat-input-box" class="input-box" contenteditable="true" placeholder="Type your message..." onkeypress="invokeLLM(event)" onpaste="clearFormatting(event)"></div>
-                    <div id="chat-send-btn" class="send-button" onclick="sendMessage()">
-                        <img class="input-icon" id="chat-send-icon" src="{{ url_for('static', filename='images/icons8-arrow-100.png') }}" />
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Link to JavaScript file -->
-        <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-        <script src="{{ url_for('static', filename='js/script.js') }}"></script>
-        <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                const displayContainer = document.getElementById('displayContainer');
-
-                // Get the list of PDF files from the backend
-                const pdfFiles = {{ pdf_files | tojson }};
-
-                if (pdfFiles.length > 0) {
-                    // Display only the first PDF file initially
-                    const firstPdfFile = pdfFiles[0];
-                    const iframe = document.createElement('iframe');
-                    iframe.src = firstPdfFile;
-                    iframe.width = '100%';  // Set to full width
-                    iframe.height = '500px';  // Adjust the height as needed
-                    iframe.style.border = 'none';  // Remove border for clean look
-                    displayContainer.appendChild(iframe);
-                } else {
-                    // Fallback message if no PDFs are available
-                    displayContainer.innerHTML = '<p>No PDF files available.</p>';
-                }
-            });
-
-            // Pass conversations from Flask to JavaScript
-            const conversations = {{ conversations | tojson }};
-            conversations.forEach((convo) => {
-                // Display user message
-                showQuestion(convo.question, "user-message");
-
-                // Simulate bot response after displaying user message
-                showAnswer(convo.answer);
-            });
-        </script>
-    </body>
+            <!-- Link to JavaScript file -->
+            <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+            <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+      </body>
 </html>
